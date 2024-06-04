@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flex-config>
+	<use-direct-blit>true</use-direct-blit>
+	<default-size>
+		<width>780</width>
+		<height>480</height>
+	</default-size>
+	<default-frame-rate>60</default-frame-rate>
+	<default-background-color>#000000</default-background-color>
+</flex-config>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flex-config>
+	<compiler>
+		<define append="true">
+			<name>CONFIG::updater</name>
+			<value>false</value>
+		</define>
+		<define append="true">
+			<name>R3::VERSION_PREFIX</name>
+			<value>"MAIN_LIB"</value>
+		</define>
+	</compiler>
+	<include-sources>
+		<path-element>./src/</path-element>
+	</include-sources>
+	<output>bin/R3Lib.swc</output>
+</flex-config>

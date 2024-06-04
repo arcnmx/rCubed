@@ -13,7 +13,7 @@
     <supportedProfiles>extendedDesktop desktop</supportedProfiles>
     <gpuPreference>discrete</gpuPreference>
     <initialWindow>
-        <content>[Path to content will be replaced by Visual Studio Code.]</content>
+        <content>R3Air.swf</content>
         <title>R^3</title>
         <systemChrome>standard</systemChrome>
         <transparent>false</transparent>
