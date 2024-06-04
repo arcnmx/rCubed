@@ -1,0 +1,9 @@
+<flex-config>
+	<compiler>
+		<optimize>true</optimize>
+		<omit-trace-statements>true</omit-trace-statements>
+	</compiler>
+	<output>bin/release/R3Air.swf</output>
+	<swf-version>43</swf-version>
+	<target-player>32.0</target-player>
+</flex-config>

@@ -1,0 +1,28 @@
+<flex-config>
+	<compiler>
+		<source-path>
+			<path-element>./src</path-element>
+		</source-path>
+		<include-libraries>
+			<library>./bin/fonts/</library>
+		</include-libraries>
+		<library-path>
+			<path-element>./libs/</path-element>
+			<path-element>./libs/assets/</path-element>
+		</library-path>
+		<strict>true</strict>
+		<!--<locale>
+			<locale-element>en_US</locale-element>
+		</locale>-->
+	</compiler>
+	<swf-version>26</swf-version>
+	<target-player>26.0</target-player>
+	<warnings>true</warnings>
+	<use-direct-blit>true</use-direct-blit>
+	<default-size>
+		<width>780</width>
+		<height>480</height>
+	</default-size>
+	<default-frame-rate>60</default-frame-rate>
+	<default-background-color>#000000</default-background-color>
+</flex-config>

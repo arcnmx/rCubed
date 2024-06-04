@@ -1,0 +1,11 @@
+<flex-config>
+	<compiler>
+		<debug>true</debug>
+		<verbose-stacktraces>true</verbose-stacktraces>
+	</compiler>
+	<output>bin/develop/R3Air.swf</output>
+	<swf-version>26</swf-version>
+	<target-player>26.0</target-player>
+	<!--<advanced-telemetry>true</advanced-telemetry>-->
+	<warnings>true</warnings>
+</flex-config>
