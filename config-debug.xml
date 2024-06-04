@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flex-config>
+	<compiler>
+		<debug>true</debug>
+		<verbose-stacktraces>true</verbose-stacktraces>
+		<define append="true">
+			<name>CONFIG::debug</name>
+			<value>true</value>
+		</define>
+		<define append="true">
+			<name>R3::VERSION_SUFFIX</name>
+			<value>"D"</value>
+		</define>
+	</compiler>
+	<output>bin/develop/R3Air.swf</output>
+	<swf-version>26</swf-version>
+	<target-player>26.0</target-player>
+	<!--<advanced-telemetry>true</advanced-telemetry>-->
+	<warnings>true</warnings>
+</flex-config>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flex-config>
+	<compiler>
+		<optimize>true</optimize>
+		<omit-trace-statements>true</omit-trace-statements>
+		<define append="true">
+			<name>CONFIG::release</name>
+			<value>true</value>
+		</define>
+		<define append="true">
+			<name>R3::HASH_STRING</name>
+			<value>"hash:${env.SCORE_SAVE_SALT}"</value>
+		</define>
+	</compiler>
+	<output>bin/release/R3Air.swf</output>
+	<swf-version>43</swf-version>
+	<target-player>32.0</target-player>
+</flex-config>

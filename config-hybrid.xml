@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flex-config>
+	<compiler>
+		<optimize>true</optimize>
+		<omit-trace-statements>true</omit-trace-statements>
+		<define append="true">
+			<name>R3::VERSION_PREFIX</name>
+			<value>"0.0.8+"</value>
+		</define>
+	</compiler>
+	<output>bin/release/R3Air.swf</output>
+	<swf-version>26</swf-version>
+	<target-player>26.0</target-player>
+</flex-config>
