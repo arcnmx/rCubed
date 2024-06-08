@@ -6,7 +6,6 @@ package menu
     import classes.chart.NoteChart;
     import classes.chart.Song;
     import classes.chart.parse.ExternalChartBase;
-    import flash.filesystem.File;
     import game.GameOptions;
 
     public class FileLoader
@@ -23,14 +22,14 @@ package menu
                 playlistURL: "",
                 songURL: ""}
 
-        public static function buildSongInfo(loc:String, id:int, isUnique:Boolean = false):SongInfo
+        public static function buildSongInfo(file:AirFile, id:int, isUnique:Boolean = false):SongInfo
         {
-            if (loc == null || loc.length == 0)
+            if (file == null)
                 return null;
 
             // Parse Chart
             var emb:ExternalChartBase = new ExternalChartBase();
-            if (emb.load(new File(loc)))
+            if (emb.load(file))
             {
                 var chartinfo:Object = emb.getInfo();
                 var chartData:Object = emb.getValidChartData(id);
@@ -103,9 +102,9 @@ package menu
             _gvars.externalSong = song;
         }
 
-        public static function setupLocalFile(loc:String, id:int):Boolean
+        public static function setupLocalFile(file:AirFile, id:int):Boolean
         {
-            var info:SongInfo = buildSongInfo(loc, id);
+            var info:SongInfo = buildSongInfo(file, id);
             if (info != null)
             {
                 buildSong(info);
@@ -114,9 +113,9 @@ package menu
             return false;
         }
 
-        public static function loadLocalFile(loc:String, id:int):void
+        public static function loadLocalFile(file:AirFile, id:int):void
         {
-            if (setupLocalFile(loc, id))
+            if (setupLocalFile(file, id))
             {
                 _gvars.songQueue = [_gvars.externalSongInfo];
 

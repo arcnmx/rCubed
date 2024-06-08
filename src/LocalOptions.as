@@ -1,8 +1,6 @@
 package
 {
 
-    import flash.filesystem.File;
-
     public class LocalOptions
     {
         private static const FILE_NAME:String = "options.json";
@@ -11,7 +9,7 @@ package
 
         public static function init():void
         {
-            var json_file:File = File.applicationStorageDirectory.resolvePath(FILE_NAME);
+            var json_file:AirFile = AirContext.getAppFile(FILE_NAME);
 
             // Use JSON first
             if (json_file.exists)

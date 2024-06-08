@@ -3,12 +3,12 @@ package popups.filebrowser
 
     public class FileFolderItem
     {
-        public var loc:String;
+        public var file:AirFile;
         public var info:Object;
 
-        public function FileFolderItem(loc:String, info:Object)
+        public function FileFolderItem(file:AirFile, info:Object)
         {
-            this.loc = loc;
+            this.file = file;
             this.info = info;
         }
     }

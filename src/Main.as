@@ -33,10 +33,10 @@ package
     import flash.events.KeyboardEvent;
     import flash.events.NativeWindowBoundsEvent;
     import flash.events.UncaughtErrorEvent;
-    import flash.filesystem.File;
     import flash.system.Capabilities;
     import flash.text.AntiAliasType;
     import flash.text.TextField;
+    import flash.utils.ByteArray;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
@@ -95,8 +95,7 @@ package
         public var bg:GameBackgroundColor;
 
         // Application Info
-        public static var SWF_FILE:File;
-        public static var SWF_PATH:String;
+        public static var SWF_FILE:AirFile;
         public static var SWF_VERSION:String;
         public static var EXE_PATH:String;
 
@@ -107,6 +106,7 @@ package
 
             //- Set GlobalVariables Stage
             _gvars.gameMain = this;
+            _gvars.flashvars = loaderInfo.parameters;
 
             if (stage)
                 gameInit();
@@ -122,17 +122,21 @@ package
                 this.removeEventListener(Event.ADDED_TO_STAGE, gameInit);
             }
 
-            //- Application
-            SWF_FILE = new File(new File(loaderInfo.loaderURL).nativePath);
-            SWF_PATH = SWF_FILE.nativePath;
-            SWF_VERSION = MD5.hashBytes(AirContext.readFile(SWF_FILE));
-            VSYNC_SUPPORT = stage.hasOwnProperty("vsyncEnabled");
-
             //- Static Class Init
             Logger.init();
             AirContext.initFolders();
+            Logger.initLogFile();
             LocalOptions.init();
             Alert.init(stage);
+
+            //- Application
+            SWF_FILE = AirFile.ofUrl(loaderInfo.loaderURL);
+            var swfData:ByteArray = AirContext.readFile(SWF_FILE);
+            if (swfData != null)
+                SWF_VERSION = MD5.hashBytes(swfData);
+            else
+                SWF_VERSION = MD5.hashBytes(loaderInfo.bytes);
+            VSYNC_SUPPORT = stage.hasOwnProperty("vsyncEnabled");
 
             //- Setup Tween Override mode
             TweenPlugin.activate([TintPlugin, AutoAlphaPlugin]);
@@ -798,12 +802,12 @@ package
             var xmlns:Namespace = new Namespace(applicationDescriptor.namespace());
             var applicationName:String = applicationDescriptor.xmlns::filename;
 
-            var applicationExecutable:File;
+            var applicationExecutable:AirFile;
 
             if (Capabilities.os.indexOf("Win") > -1)
-                applicationExecutable = new File(File.applicationDirectory.nativePath + "/" + applicationName + ".exe");
+                applicationExecutable = AirFile.applicationDirectory.resolvePath(applicationName + ".exe");
             else if (Capabilities.os.indexOf("Mac") > -1)
-                applicationExecutable = new File(File.applicationDirectory.nativePath.replace("Resources", "MacOS/" + applicationName));
+                applicationExecutable = AirFile.applicationDirectory.parent.resolvePath("MacOS/" + applicationName);
 
             if (!applicationExecutable || !applicationExecutable.exists)
                 return;
@@ -815,7 +819,7 @@ package
             // Start New
             var nativeProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
             var nativeProcess:NativeProcess = new NativeProcess();
-            nativeProcessStartupInfo.executable = applicationExecutable;
+            (nativeProcessStartupInfo as Object).executable = applicationExecutable.file as AirFile.FlashFile;
             nativeProcess.start(nativeProcessStartupInfo);
 
             // Exit Current

@@ -203,6 +203,14 @@ package com.flashfla.utils
             // iterates next match
             result = SUBS_RE.exec(raw);
         }
+        if (rest[0] != null && AirContext.isRuffle && raw.indexOf("%(") >= 0)
+        {
+            for (var replaceKey:String in rest[0])
+            {
+                raw = raw.replace("%(" + replaceKey + ")s", rest[0][replaceKey]);
+            }
+            return raw;
+        }
         // in case there's nothing to substitute, just return the initial string
         if (matches.length == 0)
         {

@@ -10,9 +10,6 @@ package classes.chart.parse
     import flash.events.ErrorEvent;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
-    import flash.filesystem.File;
-    import flash.filesystem.FileMode;
-    import flash.filesystem.FileStream;
     import flash.utils.ByteArray;
 
     public class ExternalChartBase
@@ -126,12 +123,12 @@ package classes.chart.parse
 
         //----------------------------------------------------------------------------------------------------------//
 
-        public function load(folder:File, skipMusicLoad:Boolean = false):Boolean
+        public function load(folder:AirFile, skipMusicLoad:Boolean = false):Boolean
         {
             // Search Folder for Parseable Files
             if (folder.isDirectory)
             {
-                for each (var file:File in folder.getDirectoryListing())
+                for each (var file:AirFile in folder.getDirectoryListing())
                 {
                     if (VALID_CHART_EXTENSIONS.indexOf(file.extension.toLowerCase()) != -1)
                     {
@@ -151,7 +148,7 @@ package classes.chart.parse
             // Validate and Load File Queue, Stop after first valid chart.
             while (fileQueue.length > 0)
             {
-                var firstFile:File = fileQueue.pop();
+                var firstFile:AirFile = fileQueue.pop();
 
                 if (!firstFile.exists)
                     continue;
@@ -160,7 +157,7 @@ package classes.chart.parse
 
                 parser = getParser(firstFile.extension.toLowerCase());
 
-                CHART_BYTES = readFile(firstFile);
+                CHART_BYTES = AirContext.readFile(firstFile);
 
                 if (parser.load(CHART_BYTES, info['filename']))
                 {
@@ -182,9 +179,8 @@ package classes.chart.parse
                     ID = MD5.hashBytes(CHART_BYTES);
 
                     // Folder Path
-                    var path:String = firstFile.nativePath;
-                    var endOfFolder:int = path.lastIndexOf(File.separator) + 1;
-                    info['folder'] = path.substr(0, endOfFolder);
+                    var parent:AirFile = firstFile.parent;
+                    info['folder'] = parent.url;
 
                     // Music Validation
                     if (parser.data.music.length < 4 || parser.data.music.substr(-3).toLowerCase() != "mp3")
@@ -192,12 +188,12 @@ package classes.chart.parse
 
                     if (!skipMusicLoad)
                     {
-                        var musicFile:File = firstFile.parent.resolvePath(parser.data.music);
+                        var musicFile:AirFile = parent.resolvePath(parser.data.music);
 
                         if (!musicFile.exists)
                             return false;
 
-                        AUDIO_BYTES = readFile(firstFile.parent.resolvePath(parser.data.music));
+                        AUDIO_BYTES = AirContext.readFile(parent.resolvePath(parser.data.music));
                     }
 
                     fileQueue.length = 0;
@@ -226,27 +222,6 @@ package classes.chart.parse
             }
 
             return null;
-        }
-
-        public function readFile(file:File):ByteArray
-        {
-            if (!file.exists)
-                return null;
-
-            var fileStream:FileStream = new FileStream();
-            fileStream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, e_error);
-            fileStream.addEventListener(IOErrorEvent.IO_ERROR, e_error);
-            var readData:ByteArray = new ByteArray();
-            fileStream.open(file, FileMode.READ);
-            fileStream.readBytes(readData);
-            fileStream.close();
-
-            return readData;
-
-            function e_error(e:ErrorEvent):void
-            {
-
-            }
         }
     }
 }

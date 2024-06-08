@@ -4,15 +4,12 @@ package assets
     import flash.display.Bitmap;
     import flash.display.BitmapData;
     import flash.display.GradientType;
-    import flash.display.Loader;
     import flash.display.LoaderInfo;
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
-    import flash.filesystem.File;
     import flash.geom.Matrix;
-    import flash.net.URLRequest;
 
     public class GameBackgroundColor extends Sprite
     {
@@ -119,9 +116,7 @@ package assets
 
         public function reloadImages():void
         {
-            var path:String;
-            var imageLoader:Loader;
-            var file:File;
+            var file:AirFile;
 
             // Menu Background
             for (var i:int = 0; i < BG_IMAGE_EXT.length; i++)
@@ -130,12 +125,7 @@ package assets
                 if (file.exists)
                 {
                     Logger.debug(this, "Found " + file.name);
-                    path = "file:///" + file.nativePath;
-                    imageLoader = new Loader();
-                    imageLoader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR, e_bgMenuLoaded);
-                    imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, e_bgMenuLoaded);
-                    imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, e_bgMenuLoaded);
-                    imageLoader.load(new URLRequest(path), AirContext.getLoaderContext());
+                    AirContext.loadFile(file, e_bgMenuLoaded, e_bgMenuLoaded);
                     break;
                 }
             }
@@ -148,12 +138,7 @@ package assets
                 if (file.exists)
                 {
                     Logger.debug(this, "Found " + file.name);
-                    path = "file:///" + file.nativePath;
-                    imageLoader = new Loader();
-                    imageLoader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR, e_bgGameLoaded);
-                    imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, e_bgGameLoaded);
-                    imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, e_bgGameLoaded);
-                    imageLoader.load(new URLRequest(path), AirContext.getLoaderContext());
+                    AirContext.loadFile(file, e_bgGameLoaded, e_bgMenuLoaded);
                     break;
                 }
             }
