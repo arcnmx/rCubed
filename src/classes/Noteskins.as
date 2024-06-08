@@ -8,7 +8,6 @@ package classes
     import flash.events.Event;
     import flash.events.EventDispatcher;
     import flash.events.IOErrorEvent;
-    import flash.filesystem.File;
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
@@ -661,17 +660,15 @@ package classes
         {
             _externalNoteskins = new <ExternalNoteskin>[];
 
-            var noteskinFolder:File = AirContext.getAppFile(Constant.NOTESKIN_PATH);
+            var noteskinFolder:AirFile = AirContext.getAppFile(Constant.NOTESKIN_PATH);
             if (!noteskinFolder.exists || !noteskinFolder.isDirectory || noteskinFolder.isHidden)
                 return false;
 
-            var file:File;
             var fileDataJSON:String;
             var fileData:Object;
-            var files:Array = noteskinFolder.getDirectoryListing();
-            for (var i:int = 0; i < files.length; i++)
+            var files:Vector.<AirFile> = noteskinFolder.getDirectoryListing();
+            for each (var file:AirFile in files)
             {
-                file = files[i];
                 try
                 {
                     if (file.extension != "txt")

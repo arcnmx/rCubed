@@ -24,7 +24,6 @@ package popups
     import flash.events.MouseEvent;
     import flash.events.SecurityErrorEvent;
     import flash.events.TimerEvent;
-    import flash.filesystem.File;
     import flash.filters.BlurFilter;
     import flash.geom.Point;
     import flash.net.URLRequest;
@@ -50,11 +49,11 @@ package popups
 
         public var lc:LoaderContext = new LoaderContext();
 
-        public static var rootFolder:File;
+        public static var rootFolder:AirFile;
         public static var lastSelectedIndex:int = 0;
         public static var listFilter:FileBrowserFilter = new FileBrowserFilter();
 
-        public static var pathList:Vector.<String>;
+        public static var pathList:Vector.<AirFile>;
 
         //- Background
         private var box:Box;
@@ -206,19 +205,17 @@ package popups
 
             // List Building
             var path:String;
-            var endOfFolder:Number;
             var arLen:Number = pathList.length;
-            for (var i:int = 0; i < arLen; i++)
+            for each (var file:AirFile in pathList)
             {
-                cacheValue = FileLoader.cache.getValue(pathList[i]);
-                path = pathList[i];
-                endOfFolder = path.lastIndexOf(File.separator) + 1;
-                renderList[i] = new FileFolder(path.substr(0, endOfFolder), path.substr(endOfFolder), cacheValue["ext"], new FileFolderItem(pathList[i], cacheValue));
+                cacheValue = FileLoader.cache.getValue(file.nativePath);
+                renderList.push(FileFolder.ofFile(file, cacheValue["ext"], new FileFolderItem(file, cacheValue)));
             }
 
             // Folder Merging
             var elm1:FileFolder;
             var elm2:FileFolder;
+            var i:int;
             var n:int;
             renderList.sortOn(["folder", "ext"], [Array.CASEINSENSITIVE, Array.CASEINSENSITIVE]);
             for (i = 0; i < arLen - 1; i++)
@@ -263,7 +260,7 @@ package popups
         {
             if (stage)
                 stage.focus = null;
-            rootFolder = e.target as File;
+            rootFolder = e.target as AirFile;
             refreshFolder();
         }
 
@@ -281,9 +278,7 @@ package popups
             }
             if (e.target == selectFolder || e.target == displayFolderPath)
             {
-                var tempFolder:File = new File();
-                tempFolder.addEventListener(Event.SELECT, dirSelected);
-                tempFolder.browseForDirectory(_lang.stringSimple("file_loader_select_a_directory"));
+                AirFile.browseForDirectory(dirSelected, _lang.stringSimple("file_loader_select_a_directory"));
             }
             if (e.target == loadingCancelButton)
             {
@@ -305,7 +300,7 @@ package popups
             lastSelectedIndex = 0;
             lastSelectedItem = null;
 
-            pathList = new <String>[];
+            pathList = new <AirFile>[];
 
             displayFolderPath.text = rootFolder.nativePath;
 
@@ -315,7 +310,7 @@ package popups
 
             // File Searching
             var dirQueue:Vector.<FileDirectoryQueue> = new <FileDirectoryQueue>[FileDirectoryQueue.ofRoot(rootFolder)];
-            var fileQueue:Vector.<File> = new <File>[];
+            var fileQueue:Vector.<AirFile> = new <AirFile>[];
             var activeDirQueue:FileDirectoryQueue;
             var maxDepth:int = 2;
             var validExt:Array = ExternalChartBase.VALID_CHART_EXTENSIONS;
@@ -339,14 +334,14 @@ package popups
                 var isDelay:Boolean = false;
 
                 // File Loop
-                var found:Vector.<File>;
+                var found:Vector.<AirFile>;
 
                 while (dirQueue.length > 0)
                 {
                     activeDirQueue = dirQueue.pop();
 
                     found = activeDirQueue.getFileListing(dirQueue);
-                    for each (var file:File in found)
+                    for each (var file:AirFile in found)
                     {
                         if (file.extension != null && validExt.indexOf(file.extension.toLowerCase()) != -1)
                             fileQueue.push(file);
@@ -413,8 +408,7 @@ package popups
             function e_parseTimer(e:TimerEvent):void
             {
                 var emb:ExternalChartBase;
-                var chartFile:File;
-                var stringPath:String;
+                var chartFile:AirFile;
                 var startTimer:Number = getTimer();
                 var isDelay:Boolean = false;
                 var cacheObj:Object;
@@ -422,11 +416,10 @@ package popups
                 while (pathIndex < pathTotal)
                 {
                     chartFile = fileQueue[pathIndex];
-                    stringPath = chartFile.nativePath;
-                    if ((cacheObj = FileLoader.cache.getValue(stringPath)) != null)
+                    if ((cacheObj = FileLoader.cache.getValue(chartFile.nativePath)) != null)
                     {
                         if (cacheObj.valid == 1)
-                            pathList.push(stringPath);
+                            pathList.push(chartFile);
                     }
                     else
                     {
@@ -478,10 +471,10 @@ package popups
                             }
                         }
 
-                        FileLoader.cache.setValue(stringPath, cacheObj);
+                        FileLoader.cache.setValue(chartFile.nativePath, cacheObj);
 
                         if (cacheObj.valid == 1)
-                            pathList.push(stringPath);
+                            pathList.push(chartFile);
                     }
                     pathIndex++;
 
@@ -588,12 +581,8 @@ package popups
                 var bannerExt:String = info.banner.substr(info.banner.lastIndexOf(".") + 1).toLowerCase();
                 if (bannerExt == "jpg" || bannerExt == "png" || bannerExt == "gif" || bannerExt == "jpeg")
                 {
-                    var path:String = "file:///" + info.folder + info.banner;
-                    var imageLoader:Loader = new Loader();
-                    imageLoader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR, e_bannerLoaded);
-                    imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, e_bannerLoaded);
-                    imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, e_bannerLoaded);
-                    imageLoader.load(new URLRequest(path), lc);
+                    var banner:AirFile = info.dir.resolvePath(info.banner);
+                    AirContext.loadFile(banner, e_bannerLoaded, e_bannerLoaded, lc);
 
                     function e_bannerLoaded(e:Event):void
                     {
@@ -682,7 +671,7 @@ package popups
 
             if (_mp.inGameRoom)
             {
-                _mp.ffrSelectSong(FileLoader.buildSongInfo(info.loc, id, true));
+                _mp.ffrSelectSong(FileLoader.buildSongInfo(info.file, id, true));
 
                 if (_gvars.gameMain.activePanel is MainMenu)
                     _gvars.gameMain.activePanel.switchTo(MainMenu.MENU_MULTIPLAYER);
@@ -690,13 +679,13 @@ package popups
             else
             {
                 Flags.VALUES[Flags.FILE_LOADER_OPEN] = true;
-                FileLoader.loadLocalFile(info.loc, id);
+                FileLoader.loadLocalFile(info.file, id);
             }
         }
 
         private function e_reloadCache(e:Event):void
         {
-            var chartFile:File;
+            var chartFile:AirFile;
             var emb:ExternalChartBase;
             var cacheObj:Object;
 
@@ -704,7 +693,7 @@ package popups
             var fileList:Vector.<FileFolderItem> = file.data;
             for each (var chartItem:FileFolderItem in fileList)
             {
-                chartFile = new File(chartItem.loc);
+                chartFile = chartItem.file;
                 cacheObj = {"valid": 0};
                 emb = new ExternalChartBase();
                 if (emb.load(chartFile, true))
@@ -740,7 +729,7 @@ package popups
                     }
                 }
 
-                FileLoader.cache.setValue(chartItem.loc, cacheObj);
+                FileLoader.cache.setValue(chartFile.nativePath, cacheObj);
             }
             FileLoader.cache.save();
             Alert.add(_lang.string("file_loader_reloaded_file"));

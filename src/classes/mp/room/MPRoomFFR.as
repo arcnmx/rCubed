@@ -367,7 +367,7 @@ package classes.mp.room
                             return entry["id"] == songData.engine.cacheID;
                         });
 
-                        songInfo = FileLoader.buildSongInfo(chartPath, songData.engine.chartID, true);
+                        songInfo = FileLoader.buildSongInfo(AirFile.ofUrl(chartPath), songData.engine.chartID, true);
                         _mp.dispatchEvent(new MPRoomEvent(MPEvent.FFR_SONG_CHANGE, cmd, this, user));
                         return;
                     }

@@ -13,7 +13,6 @@ package popups.replays
     import flash.display.Sprite;
     import flash.events.MouseEvent;
     import flash.events.TimerEvent;
-    import flash.filesystem.File;
     import flash.utils.Timer;
     import flash.utils.getTimer;
 
@@ -159,9 +158,9 @@ package popups.replays
             var TIME:Number = new Date().getTime();
 
             // File Searching
-            var replays:File = AirContext.getAppFile(Constant.REPLAY_PATH);
+            var replays:AirFile = AirContext.getAppFile(Constant.REPLAY_PATH);
             var dirQueue:Vector.<FileDirectoryQueue> = new <FileDirectoryQueue>[new FileDirectoryQueue(replays, 0)];
-            var fileQueue:Vector.<File> = new <File>[];
+            var fileQueue:Vector.<AirFile> = new <AirFile>[];
             var activeDirQueue:FileDirectoryQueue;
 
             e_startFileSearch();
@@ -182,7 +181,7 @@ package popups.replays
                 var isDelay:Boolean = false;
 
                 // File Loop
-                var found:Vector.<File>;
+                var found:Vector.<AirFile>;
 
                 while (dirQueue.length > 0)
                 {
@@ -190,7 +189,7 @@ package popups.replays
 
                     found = activeDirQueue.getFileListing(dirQueue);
 
-                    for each (var file:File in found)
+                    for each (var file:AirFile in found)
                     {
                         if (file.extension != null && file.extension.toLowerCase() == "txt")
                         {
@@ -256,7 +255,7 @@ package popups.replays
             function e_parseTimer(e:TimerEvent):void
             {
                 var r:Replay;
-                var chartFile:File;
+                var chartFile:AirFile;
                 var stringPath:String;
                 var startTimer:Number = getTimer();
                 var isDelay:Boolean = false;

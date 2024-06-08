@@ -102,7 +102,7 @@ package classes.mp.mode.ffr
                             return entry["id"] == songData.engine.cacheID;
                         });
 
-                        songInfo = FileLoader.buildSongInfo(chartPath, songData.engine.chartID, true);
+                        songInfo = FileLoader.buildSongInfo(AirFile.ofUrl(chartPath), songData.engine.chartID, true);
                         return;
                     }
                 }

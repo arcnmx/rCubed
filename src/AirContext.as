@@ -1,19 +1,21 @@
 package
 {
     import by.blooddy.crypto.MD5;
+    import classes.DynamicLoader;
     import classes.FileTracker;
     import classes.chart.Song;
     import com.flashfla.utils.SystemUtil;
     import flash.events.Event;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
-    import flash.filesystem.File;
-    import flash.filesystem.FileMode;
-    import flash.filesystem.FileStream;
     import flash.system.ApplicationDomain;
     import flash.system.Capabilities;
     import flash.system.LoaderContext;
+    import flash.display.Loader;
+    import flash.net.URLRequest;
     import flash.utils.ByteArray;
+    import flash.utils.IDataInput;
+    import flash.utils.IDataOutput;
 
     /**
      * Contains methods that deal with AIR specific things, in regular flash builds, these are either excluded or stubbed.
@@ -21,39 +23,63 @@ package
     public class AirContext
     {
         // Windows will store files in the current folder, other OS will use the application storage folder.
-        public static var STORAGE_PATH:File;
+        public static var STORAGE_PATH:AirFile = initStoragePath();
+
+        private static function initStoragePath():AirFile
         {
-            if (SystemUtil.OS.toLowerCase().indexOf("win") == -1)
+            if (isNative)
+                AirFile.initNative();
+
+            if (!isNative || SystemUtil.OS.toLowerCase().indexOf("win") == -1)
             {
-                STORAGE_PATH = File.applicationStorageDirectory;
+                return AirFile.applicationStorageDirectory;
             }
             else
             {
-                STORAGE_PATH = new File(File.applicationDirectory.nativePath);
+                return AirFile.applicationDirectory;
             }
         }
 
         public static function initFolders():void
         {
+            if (!STORAGE_PATH.hasFile) {
+                return;
+            }
+
             // song cache
-            var folder:File = STORAGE_PATH.resolvePath(Constant.SONG_CACHE_PATH);
+            var folder:AirFile = STORAGE_PATH.resolvePath(Constant.SONG_CACHE_PATH);
             if (!folder.exists)
-                folder.createDirectory();
+                folder.file.createDirectory();
 
             // replays
             folder = STORAGE_PATH.resolvePath(Constant.REPLAY_PATH);
             if (!folder.exists)
-                folder.createDirectory();
+                folder.file.createDirectory();
 
             // noteskins
             folder = STORAGE_PATH.resolvePath(Constant.NOTESKIN_PATH);
             if (!folder.exists)
-                folder.createDirectory();
+                folder.file.createDirectory();
+        }
+
+        public static function get isAir():Boolean
+        {
+            return Capabilities.playerType == "Desktop";
         }
 
         public static function get isNative():Boolean
         {
-            return Capabilities.playerType == "Desktop";
+            return isAir && !isRuffle;
+        }
+
+        public static function get isRuffle():Boolean
+        {
+            return GlobalVariables.instance.flashvars["ruffle"] == "1";
+        }
+
+        public static function get hasFilesystem():Boolean
+        {
+            return isAir && AirFile.FlashFile != null;
         }
 
         public static function createFileName(file_name:String, replace:String = ""):String
@@ -109,7 +135,7 @@ package
             trace(e);
         }
 
-        static public function getAppFile(path:String):File
+        static public function getAppFile(path:String):AirFile
         {
             return STORAGE_PATH.resolvePath(path);
         }
@@ -119,77 +145,94 @@ package
             return STORAGE_PATH.resolvePath(path).exists;
         }
 
-        static public function writeFile(file:File, bytes:ByteArray, key:uint = 0, errorCallback:Function = null):File
+        static public function writeFile(file:AirFile, bytes:ByteArray, key:uint = 0, errorCallback:Function = null):void
         {
-            var fileStream:FileStream = new FileStream();
-            fileStream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, (errorCallback != null ? errorCallback : e_fileError));
-            fileStream.addEventListener(IOErrorEvent.IO_ERROR, (errorCallback != null ? errorCallback : e_fileError));
-            fileStream.open(file, FileMode.WRITE);
-            fileStream.writeBytes(encodeData(bytes, key));
-            fileStream.close();
-
-            return file;
+            var fileStream:IDataOutput = file.openWrite(errorCallback != null ? errorCallback : e_fileError);
+            if (fileStream != null)
+            {
+                fileStream.writeBytes(encodeData(bytes, key));
+                file.close(fileStream);
+            }
         }
 
-        static public function readFile(file:File, key:uint = 0, errorCallback:Function = null):ByteArray
+        static public function readFile(file:AirFile, key:uint = 0, errorCallback:Function = null):ByteArray
         {
-            if (file.exists)
+            var fileStream:IDataInput = file.openRead(errorCallback != null ? errorCallback : e_fileError);
+            var readData:ByteArray = null;
+            if (fileStream != null)
             {
-                var fileStream:FileStream = new FileStream();
-                fileStream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, (errorCallback != null ? errorCallback : e_fileError));
-                fileStream.addEventListener(IOErrorEvent.IO_ERROR, (errorCallback != null ? errorCallback : e_fileError));
-                var readData:ByteArray = new ByteArray();
-                fileStream.open(file, FileMode.READ);
+                readData = new ByteArray();
                 fileStream.readBytes(readData);
-                fileStream.close();
-
-                return encodeData(readData, key);
+                file.close(fileStream);
+                readData = encodeData(readData, key);
             }
-            return null;
+            return readData;
         }
 
-        static public function readTextFile(file:File, errorCallback:Function = null):String
+        static public function readTextFile(file:AirFile, errorCallback:Function = null):String
         {
-            if (file.exists)
+            var fileStream:IDataInput = file.openRead(errorCallback != null ? errorCallback : e_fileError);
+            var readData:String = null;
+            if (fileStream != null)
             {
-                var fileStream:FileStream = new FileStream();
-                fileStream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, (errorCallback != null ? errorCallback : e_fileError));
-                fileStream.addEventListener(IOErrorEvent.IO_ERROR, (errorCallback != null ? errorCallback : e_fileError));
-                fileStream.open(file, FileMode.READ);
-                var data:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-                fileStream.close();
-
-                return data;
+                readData = fileStream.readUTFBytes(fileStream.bytesAvailable);
+                file.close(fileStream);
             }
-            return null;
+            return readData;
         }
 
-        static public function writeTextFile(file:File, data:String, errorCallback:Function = null):File
+        static public function writeTextFile(file:AirFile, data:String, errorCallback:Function = null):void
         {
             if (data == null || data.length == 0)
-                return file;
+                return;
 
-            var fileStream:FileStream = new FileStream();
-            fileStream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, (errorCallback != null ? errorCallback : e_fileError));
-            fileStream.addEventListener(IOErrorEvent.IO_ERROR, (errorCallback != null ? errorCallback : e_fileError));
-            fileStream.open(file, FileMode.WRITE);
-            fileStream.writeUTFBytes(data);
-            fileStream.close();
-
-            return file;
+            var fileStream:IDataOutput = file.openWrite(errorCallback != null ? errorCallback : e_fileError);
+            if (fileStream != null)
+            {
+                fileStream.writeUTFBytes(data);
+                file.close(fileStream);
+            }
         }
 
-        static public function deleteFile(file:File):Boolean
+        static public function appendTextFile(file:AirFile, data:String, errorCallback:Function = null):void
         {
-            if (file.exists)
+            if (data == null || data.length == 0)
+                return;
+
+            var fileStream:IDataOutput = file.openAppend(errorCallback != null ? errorCallback : e_fileError);
+            if (fileStream != null)
             {
-                file.moveToTrash();
+                fileStream.writeUTFBytes(data);
+                file.close(fileStream);
+            }
+        }
+
+        static public function loadFile(file:AirFile, callback:Function = null, errorCallback:Function = null, context:LoaderContext = null):DynamicLoader {
+            var dynloader:DynamicLoader = new DynamicLoader();
+            var loader:Loader = dynloader;
+            loader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR, errorCallback != null ? errorCallback : e_fileError);
+            loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, errorCallback != null ? errorCallback : e_fileError);
+
+            if (callback != null)
+            {
+                loader.contentLoaderInfo.addEventListener(Event.COMPLETE, callback);
+            }
+
+            loader.load(new URLRequest(file.url), context != null ? context : getLoaderContext());
+            return dynloader;
+        }
+
+        static public function deleteFile(file:AirFile):Boolean
+        {
+            if (file.hasFile && file.exists)
+            {
+                file.file.moveToTrash();
                 return true;
             }
             return false;
         }
 
-        public static function getFileSize(file:File, track:FileTracker = null, track_file_paths:Boolean = false):FileTracker
+        public static function getFileSize(file:AirFile, track:FileTracker = null, track_file_paths:Boolean = false):FileTracker
         {
             if (!track)
                 track = new FileTracker();
@@ -201,8 +244,8 @@ package
             if (file.isDirectory)
             {
                 track.dirs++;
-                var files:Array = file.getDirectoryListing();
-                for each (var f:File in files)
+                var files:Vector.<AirFile> = file.getDirectoryListing();
+                for each (var f:AirFile in files)
                 {
                     if (f.isDirectory)
                     {
@@ -211,7 +254,7 @@ package
                     else
                     {
                         if (track_file_paths)
-                            track.file_paths.push(f.nativePath);
+                            track.file_paths.push(f);
                         track.files++;
                         track.size += f.size;
                     }
@@ -220,7 +263,7 @@ package
             else
             {
                 if (track_file_paths)
-                    track.file_paths.push(file.nativePath);
+                    track.file_paths.push(file);
                 track.files++;
                 track.size += file.size;
             }

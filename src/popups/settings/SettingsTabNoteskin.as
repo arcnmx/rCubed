@@ -133,7 +133,9 @@ package popups.settings
 
             yOff += 39;
 
-            optionOpenNoteskinFolder = new BoxButton(container, xOff, yOff, 125, 29, _lang.string("options_open_noteskin_folder"), 12, clickHandler);
+            if (AirContext.hasFilesystem) {
+                optionOpenNoteskinFolder = new BoxButton(container, xOff, yOff, 125, 29, _lang.string("options_open_noteskin_folder"), 12, clickHandler);
+            }
             optionExportCustomNoteskin = new BoxButton(container, xOff + 135, yOff, 125, 29, _lang.string("options_copy_noteskin_data"), 12, clickHandler);
 
             /// Col 2
@@ -277,9 +279,9 @@ package popups.settings
             }
 
             //- Custom Noteskin Folder
-            else if (e.target == optionOpenNoteskinFolder)
+            else if (AirContext.hasFilesystem && e.target == optionOpenNoteskinFolder)
             {
-                AirContext.STORAGE_PATH.resolvePath(Constant.NOTESKIN_PATH).openWithDefaultApplication();
+                AirContext.STORAGE_PATH.resolvePath(Constant.NOTESKIN_PATH).file.openWithDefaultApplication();
                 return;
             }
 
