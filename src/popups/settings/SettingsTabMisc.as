@@ -66,8 +66,10 @@ package popups.settings
 
         override public function openTab():void
         {
-            Main.window.addEventListener(NativeWindowBoundsEvent.MOVE, e_windowPropertyChange);
-            Main.window.addEventListener(NativeWindowBoundsEvent.RESIZE, e_windowPropertyChange);
+            if (Main.window != null) {
+                Main.window.addEventListener(NativeWindowBoundsEvent.MOVE, e_windowPropertyChange);
+                Main.window.addEventListener(NativeWindowBoundsEvent.RESIZE, e_windowPropertyChange);
+            }
 
             var i:int;
             var xOff:int = 15;
@@ -199,8 +201,10 @@ package popups.settings
 
         override public function closeTab():void
         {
-            Main.window.removeEventListener(NativeWindowBoundsEvent.MOVE, e_windowPropertyChange);
-            Main.window.removeEventListener(NativeWindowBoundsEvent.RESIZE, e_windowPropertyChange);
+            if (Main.window != null) {
+                Main.window.removeEventListener(NativeWindowBoundsEvent.MOVE, e_windowPropertyChange);
+                Main.window.removeEventListener(NativeWindowBoundsEvent.RESIZE, e_windowPropertyChange);
+            }
         }
 
         override public function setValues():void
@@ -298,7 +302,7 @@ package popups.settings
                 _gvars.air_saveWindowPosition = !_gvars.air_saveWindowPosition;
                 LocalOptions.setVariable("save_window_position", _gvars.air_saveWindowPosition);
             }
-            else if (e.target == windowPositionSet)
+            else if (e.target == windowPositionSet && Main.window != null)
             {
                 parent.addChild(new WindowSettingConfirm(this, _gvars.air_windowProperties));
 
@@ -306,7 +310,7 @@ package popups.settings
                 _gvars.air_windowProperties["y"] = windowYBox.validate(Math.round((Capabilities.screenResolutionY - Main.window.height) * 0.5));
                 e_windowSetUpdate();
             }
-            else if (e.target == windowPositionReset)
+            else if (e.target == windowPositionReset && Main.window != null)
             {
                 _gvars.air_windowProperties["x"] = Math.round((Capabilities.screenResolutionX - Main.window.width) * 0.5);
                 _gvars.air_windowProperties["y"] = Math.round((Capabilities.screenResolutionY - Main.window.height) * 0.5);
@@ -357,10 +361,12 @@ package popups.settings
         public function e_windowSetUpdate():void
         {
             _gvars.gameMain.ignoreWindowChanges = true;
-            Main.window.x = _gvars.air_windowProperties["x"];
-            Main.window.y = _gvars.air_windowProperties["y"];
-            Main.window.width = _gvars.air_windowProperties["width"] + Main.WINDOW_WIDTH_EXTRA;
-            Main.window.height = _gvars.air_windowProperties["height"] + Main.WINDOW_HEIGHT_EXTRA;
+            if (Main.window != null) {
+                Main.window.x = _gvars.air_windowProperties["x"];
+                Main.window.y = _gvars.air_windowProperties["y"];
+                Main.window.width = _gvars.air_windowProperties["width"] + Main.WINDOW_WIDTH_EXTRA;
+                Main.window.height = _gvars.air_windowProperties["height"] + Main.WINDOW_HEIGHT_EXTRA;
+            }
             _gvars.gameMain.ignoreWindowChanges = false;
         }
 

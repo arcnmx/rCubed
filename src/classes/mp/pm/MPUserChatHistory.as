@@ -56,7 +56,8 @@ package classes.mp.pm
 
         public function addGameInvite(user:MPUser, sender:MPUser, data:Object):void
         {
-            Main.window.notifyUser(NotificationType.INFORMATIONAL);
+            if (Main.window != null)
+                Main.window.notifyUser(NotificationType.INFORMATIONAL);
 
             add(new MPChatLogRoomInvite(sender, data));
             newMessage = true;

@@ -62,7 +62,8 @@ package game.controls
             field.y = -30;
             field.visible = true;
             field.alpha = 1;
-            field.cacheAsBitmapMatrix = new Matrix();
+            if (AirContext.isNative)
+                field.cacheAsBitmapMatrix = new Matrix();
             addChild(field)
 
             //updateDisplay();

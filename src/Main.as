@@ -139,21 +139,25 @@ package
             TweenLite.defaultOverwrite = "all";
             stage.stageFocusRect = false;
 
-            //- Load Air Items
-            _gvars.loadAirOptions();
+            if (AirContext.isNative) {
+                //- Load Air Items
+                _gvars.loadAirOptions();
 
-            //- Window Options
-            window = stage.nativeWindow;
-            window.title = Constant.AIR_WINDOW_TITLE;
-            window.addEventListener(Event.CLOSING, e_onNativeWindowClosing);
-            window.addEventListener(NativeWindowBoundsEvent.MOVE, e_onNativeWindowPropertyChange, false, 1);
-            window.addEventListener(NativeWindowBoundsEvent.RESIZE, e_onNativeWindowPropertyChange, false, 1);
+                //- Window Options
+                window = stage.nativeWindow;
+                window.title = Constant.AIR_WINDOW_TITLE;
+                window.addEventListener(Event.CLOSING, e_onNativeWindowClosing);
+                window.addEventListener(NativeWindowBoundsEvent.MOVE, e_onNativeWindowPropertyChange, false, 1);
+                window.addEventListener(NativeWindowBoundsEvent.RESIZE, e_onNativeWindowPropertyChange, false, 1);
+                NativeApplication.nativeApplication.addEventListener(Event.EXITING, e_onNativeShutdown);
+            }
             loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, e_uncaughtErrorHandler);
-            NativeApplication.nativeApplication.addEventListener(Event.EXITING, e_onNativeShutdown);
             stage.addEventListener("vSyncStateChangeAvailability", e_onVsyncStateChangeAvailability); // Lacking proper event class due to SDK limitations in Air 26.
 
-            WINDOW_WIDTH_EXTRA = window.width - GAME_WIDTH;
-            WINDOW_HEIGHT_EXTRA = window.height - GAME_HEIGHT;
+            if (window != null) {
+                WINDOW_WIDTH_EXTRA = window.width - GAME_WIDTH;
+                WINDOW_HEIGHT_EXTRA = window.height - GAME_HEIGHT;
+            }
 
             ignoreWindowChanges = true;
             if (_gvars.air_saveWindowPosition)

@@ -11,6 +11,7 @@ package
     import flash.filesystem.FileMode;
     import flash.filesystem.FileStream;
     import flash.system.ApplicationDomain;
+    import flash.system.Capabilities;
     import flash.system.LoaderContext;
     import flash.utils.ByteArray;
 
@@ -48,6 +49,11 @@ package
             folder = STORAGE_PATH.resolvePath(Constant.NOTESKIN_PATH);
             if (!folder.exists)
                 folder.createDirectory();
+        }
+
+        public static function get isNative():Boolean
+        {
+            return Capabilities.playerType == "Desktop";
         }
 
         public static function createFileName(file_name:String, replace:String = ""):String
