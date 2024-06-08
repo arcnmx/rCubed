@@ -232,7 +232,8 @@ package classes
             n.graphics.drawRect(0, 0, bmd.width, bmd.height);
             n.graphics.endFill();
             n.cacheAsBitmap = true;
-            n.cacheAsBitmapMatrix = new Matrix();
+            if (AirContext.isNative)
+                n.cacheAsBitmapMatrix = new Matrix();
             n.mouseEnabled = false;
             n.doubleClickEnabled = false;
             n.tabEnabled = false;

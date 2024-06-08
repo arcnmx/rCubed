@@ -90,7 +90,7 @@ package
          */
         public static function flush(minDiskSize:int = 0):void
         {
-            AirContext.writeTextFile(File.applicationStorageDirectory.resolvePath(FILE_NAME), JSON.stringify(SO_OBJECT, null, 2));
+            AirContext.writeTextFile(AirContext.getAppFile(FILE_NAME), JSON.stringify(SO_OBJECT, null, 2));
         }
 
         public static function importFromLocalStore():void

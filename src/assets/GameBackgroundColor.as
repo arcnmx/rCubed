@@ -56,7 +56,8 @@ package assets
             this.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
             this.graphics.endFill();
             this.cacheAsBitmap = true;
-            this.cacheAsBitmapMatrix = _matrix;
+            if (AirContext.isNative)
+                this.cacheAsBitmapMatrix = _matrix;
 
             var bt:BitmapData = new GameBackgroundStripes();
             this.graphics.beginBitmapFill(bt, null, false);
@@ -73,7 +74,8 @@ package assets
                 lastFade.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
                 lastFade.graphics.endFill();
                 lastFade.cacheAsBitmap = true;
-                lastFade.cacheAsBitmapMatrix = _matrix;
+                if (AirContext.isNative)
+                    lastFade.cacheAsBitmapMatrix = _matrix;
                 addChild(lastFade);
                 TweenLite.to(lastFade, 1, {"alpha": 0, "onComplete": onFadeComplete});
             }
