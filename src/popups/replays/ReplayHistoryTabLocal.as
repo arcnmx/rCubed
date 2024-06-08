@@ -1,6 +1,7 @@
 package popups.replays
 {
     import arc.ArcGlobals;
+    import classes.FileDirectoryQueue;
     import classes.Language;
     import classes.SongInfo;
     import classes.replay.Replay;
@@ -158,10 +159,10 @@ package popups.replays
             var TIME:Number = new Date().getTime();
 
             // File Searching
-            var dirQueue:Vector.<FileDirectoryQueue> = new <FileDirectoryQueue>[new FileDirectoryQueue(AirContext.getAppFile("replays"), 0)];
+            var replays:File = AirContext.getAppFile(Constant.REPLAY_PATH);
+            var dirQueue:Vector.<FileDirectoryQueue> = new <FileDirectoryQueue>[new FileDirectoryQueue(replays, 0)];
             var fileQueue:Vector.<File> = new <File>[];
             var activeDirQueue:FileDirectoryQueue;
-            var maxDepth:int = 2;
 
             e_startFileSearch();
 
@@ -181,39 +182,19 @@ package popups.replays
                 var isDelay:Boolean = false;
 
                 // File Loop
-                var found:Array;
-                var len:int;
-                var file:File;
-                var i:int;
+                var found:Vector.<File>;
 
                 while (dirQueue.length > 0)
                 {
                     activeDirQueue = dirQueue.pop();
 
-                    found = activeDirQueue.dir.getDirectoryListing();
-                    len = found.length;
+                    found = activeDirQueue.getFileListing(dirQueue);
 
-                    for (i = 0; i < len; i++)
+                    for each (var file:File in found)
                     {
-                        file = found[i];
-
-                        if (file.isHidden || !file.exists)
+                        if (file.extension != null && file.extension.toLowerCase() == "txt")
                         {
-                            continue;
-                        }
-                        else if (file.isDirectory)
-                        {
-                            if (activeDirQueue.level < maxDepth)
-                            {
-                                dirQueue.push(new FileDirectoryQueue(file, activeDirQueue.level + 1));
-                            }
-                        }
-                        else
-                        {
-                            if (file.extension != null && file.extension.toLowerCase() == "txt")
-                            {
-                                fileQueue.push(file);
-                            }
+                            fileQueue.push(file);
                         }
                     }
 
@@ -413,19 +394,5 @@ package popups.replays
 
             return r;
         }
-    }
-}
-
-import flash.filesystem.File;
-
-internal class FileDirectoryQueue
-{
-    public var dir:File;
-    public var level:int;
-
-    public function FileDirectoryQueue(dir:File, level:int)
-    {
-        this.dir = dir;
-        this.level = level;
     }
 }

@@ -4,6 +4,7 @@ package popups
     import assets.menu.icons.fa.iconFolder;
     import assets.menu.icons.fa.iconUpLevel;
     import classes.Alert;
+    import classes.FileDirectoryQueue;
     import classes.Language;
     import classes.chart.parse.ExternalChartBase;
     import classes.mp.Multiplayer;
@@ -313,7 +314,7 @@ package popups
             var loadTimer:Timer;
 
             // File Searching
-            var dirQueue:Vector.<FileDirectoryQueue> = new <FileDirectoryQueue>[new FileDirectoryQueue(rootFolder, 0)];
+            var dirQueue:Vector.<FileDirectoryQueue> = new <FileDirectoryQueue>[FileDirectoryQueue.ofRoot(rootFolder)];
             var fileQueue:Vector.<File> = new <File>[];
             var activeDirQueue:FileDirectoryQueue;
             var maxDepth:int = 2;
@@ -338,36 +339,17 @@ package popups
                 var isDelay:Boolean = false;
 
                 // File Loop
-                var found:Array;
-                var len:int;
-                var file:File;
-                var i:int;
+                var found:Vector.<File>;
 
                 while (dirQueue.length > 0)
                 {
                     activeDirQueue = dirQueue.pop();
 
-                    found = activeDirQueue.dir.getDirectoryListing();
-                    len = found.length;
-
-                    for (i = 0; i < len; i++)
+                    found = activeDirQueue.getFileListing(dirQueue);
+                    for each (var file:File in found)
                     {
-                        file = found[i];
-
-                        if (file.isHidden || !file.exists)
-                        {
-                            continue;
-                        }
-                        else if (file.isDirectory)
-                        {
-                            if (activeDirQueue.level < maxDepth)
-                                dirQueue.push(new FileDirectoryQueue(file, activeDirQueue.level + 1));
-                        }
-                        else
-                        {
-                            if (file.extension != null && validExt.indexOf(file.extension.toLowerCase()) != -1)
-                                fileQueue.push(file);
-                        }
+                        if (file.extension != null && validExt.indexOf(file.extension.toLowerCase()) != -1)
+                            fileQueue.push(file);
                     }
 
                     var endTimer:Number = getTimer();
@@ -781,19 +763,5 @@ package popups
                 }
             }
         }
-    }
-}
-
-import flash.filesystem.File;
-
-internal class FileDirectoryQueue
-{
-    public var dir:File;
-    public var level:int;
-
-    public function FileDirectoryQueue(dir:File, level:int)
-    {
-        this.dir = dir;
-        this.level = level;
     }
 }
