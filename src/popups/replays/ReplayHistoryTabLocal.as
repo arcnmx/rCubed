@@ -12,7 +12,6 @@ package popups.replays
     import flash.display.Sprite;
     import flash.events.MouseEvent;
     import flash.events.TimerEvent;
-    import flash.filesystem.File;
     import flash.utils.Timer;
     import flash.utils.getTimer;
 
@@ -158,8 +157,9 @@ package popups.replays
             var TIME:Number = new Date().getTime();
 
             // File Searching
-            var dirQueue:Vector.<FileDirectoryQueue> = new <FileDirectoryQueue>[new FileDirectoryQueue(AirContext.getAppFile("replays"), 0)];
-            var fileQueue:Vector.<File> = new <File>[];
+            var replays:AirFile = AirContext.getAppFile(Constant.REPLAY_PATH);
+            var dirQueue:Vector.<FileDirectoryQueue> = new <FileDirectoryQueue>[new FileDirectoryQueue(replays, 0)];
+            var fileQueue:Vector.<AirFile> = new <AirFile>[];
             var activeDirQueue:FileDirectoryQueue;
             var maxDepth:int = 2;
 
@@ -182,21 +182,15 @@ package popups.replays
 
                 // File Loop
                 var found:Array;
-                var len:int;
-                var file:File;
-                var i:int;
 
                 while (dirQueue.length > 0)
                 {
                     activeDirQueue = dirQueue.pop();
 
                     found = activeDirQueue.dir.getDirectoryListing();
-                    len = found.length;
 
-                    for (i = 0; i < len; i++)
+                    for each (var file:AirFile in found)
                     {
-                        file = found[i];
-
                         if (file.isHidden || !file.exists)
                         {
                             continue;
@@ -275,7 +269,7 @@ package popups.replays
             function e_parseTimer(e:TimerEvent):void
             {
                 var r:Replay;
-                var chartFile:File;
+                var chartFile:AirFile;
                 var stringPath:String;
                 var startTimer:Number = getTimer();
                 var isDelay:Boolean = false;
@@ -420,10 +414,10 @@ import flash.filesystem.File;
 
 internal class FileDirectoryQueue
 {
-    public var dir:File;
+    public var dir:AirFile;
     public var level:int;
 
-    public function FileDirectoryQueue(dir:File, level:int)
+    public function FileDirectoryQueue(dir:AirFile, level:int)
     {
         this.dir = dir;
         this.level = level;

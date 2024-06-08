@@ -20,7 +20,6 @@ package
     import flash.events.EventDispatcher;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
-    import flash.filesystem.File;
     import flash.media.SoundTransform;
     import flash.net.URLLoader;
     import flash.net.URLLoaderDataFormat;
@@ -48,6 +47,7 @@ package
         public var gameMain:Main;
 
         public var options:GameOptions;
+        public var flashvars:Object;
 
         ///- Game Data
         public var TOTAL_GENRES:uint = 13;
@@ -149,7 +149,7 @@ package
         {
             // Export SQL to JSON
             var db_name:String = "dbinfo/" + (activeUser != null && activeUser.siteId > 0 ? activeUser.siteId : "0") + "_info.";
-            var json_file:File = AirContext.getAppFile(db_name + "json");
+            var json_file:AirFile = AirContext.getAppFile(db_name + "json");
 
             if (json_file.exists)
             {
@@ -171,7 +171,7 @@ package
         public function writeUserSongData():void
         {
             var db_name:String = "dbinfo/" + (activeUser != null && activeUser.siteId > 0 ? activeUser.siteId : "0") + "_info.";
-            var json_file:File = AirContext.getAppFile(db_name + "json");
+            var json_file:AirFile = AirContext.getAppFile(db_name + "json");
             UserSongNotes.writeFile(json_file);
         }
 

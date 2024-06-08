@@ -7,7 +7,7 @@ package classes
         public var files:Number = 0;
         public var dirs:Number = 0;
         public var size:Number = 0;
-        public var file_paths:Vector.<String> = new Vector.<String>();
+        public var file_paths:Vector.<AirFile> = new Vector.<AirFile>();
 
         public function get size_human():String
         {
