@@ -17,8 +17,6 @@ package
             CACHE_FILE_NAME = cache_name;
             CACHE_FILE_VERSION = cache_version;
             CACHE = getDefaultCacheObject();
-
-            load();
         }
 
         public function load():void

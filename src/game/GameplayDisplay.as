@@ -390,7 +390,7 @@ package game
             if (!options.isEditor && !options.replay && !isMultiplayerSpectator)
                 Mouse.hide();
 
-            if (song.songInfo && song.songInfo.name)
+            if (Main.window != null && song.songInfo && song.songInfo.name)
                 Main.window.title = Constant.AIR_WINDOW_TITLE + " - " + StringUtil.stripHtml(song.songInfo.name);
 
             // Prebuild Websocket Message, this is updated instead of creating a new object every message.
@@ -490,7 +490,8 @@ package game
         override public function stageRemove():void
         {
             // Reset Window Title
-            Main.window.title = Constant.AIR_WINDOW_TITLE;
+            if (Main.window != null)
+                Main.window.title = Constant.AIR_WINDOW_TITLE;
 
             stage.frameRate = 60;
 
