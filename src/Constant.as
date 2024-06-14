@@ -27,6 +27,7 @@ package
         public static var NOTESKIN_PATH:String = "noteskins/";
         public static var REPLAY_PATH:String = "replays/";
         public static var SONG_CACHE_PATH:String = "song_cache/";
+        public static var LOG_PATH:String = "logs/";
 
         public static const TEXT_FORMAT:TextFormat = new TextFormat(Fonts.BASE_FONT, 14, 0xFFFFFF, true);
         public static const TEXT_FORMAT_12:TextFormat = new TextFormat(Fonts.BASE_FONT, 12, 0xFFFFFF, true);

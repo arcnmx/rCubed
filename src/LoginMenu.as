@@ -299,7 +299,7 @@ package
             {
                 Logger.error(this, "Parse Failure: " + Logger.exception_error(err));
                 Logger.error(this, "Wrote invalid response data to log folder. [logs/login.txt]");
-                AirContext.writeTextFile(AirContext.getAppFile("logs/login.txt"), siteDataString);
+                AirContext.writeTextFile(AirContext.getAppFile(Constant.LOG_PATH).resolvePath("login.txt"), siteDataString);
 
                 Alert.add(_lang.string("login_connection_error"));
                 setFields(false);

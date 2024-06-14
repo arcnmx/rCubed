@@ -60,6 +60,13 @@ package
             folder = STORAGE_PATH.resolvePath(Constant.NOTESKIN_PATH);
             if (!folder.exists)
                 folder.file.createDirectory();
+
+            if (Logger.file_log) {
+                // logs
+                folder = STORAGE_PATH.resolvePath(Constant.LOG_PATH);
+                if (!folder.exists)
+                    folder.file.createDirectory();
+            }
         }
 
         public static function get isAir():Boolean
