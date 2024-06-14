@@ -94,6 +94,7 @@ package classes.score
             ret ||= valid_replay && !result.options.isScoreValid(false, true);
             ret ||= check_replay && (result.replayData == null || result.replayData.length <= 0 || result.score <= 0 || (result.options.replay && result.options.replay.isEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
+            ret &&= check_alt_engine || Main.SWF_VERSION != null;
             return !ret;
         }
 
@@ -115,6 +116,7 @@ package classes.score
             ret ||= valid_replay && !result.options.isScoreUpdated(false, true);
             ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (result.options.replay && result.options.replay.isEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
+            ret &&= check_alt_engine || Main.SWF_VERSION != null;
             return !ret;
         }
 
@@ -192,7 +194,7 @@ package classes.score
                 {
                     Logger.error(instance, "Canon Parse Failure: " + Logger.exception_error(err));
                     Logger.error(instance, "Wrote invalid response data to log folder. [logs/c_result.txt]");
-                    AirContext.writeTextFile(AirContext.getAppFile("logs/c_result.txt"), siteDataString);
+                    AirContext.writeTextFile(AirContext.getAppFile(Constant.LOG_PATH).resolvePath("c_result.txt"), siteDataString);
 
                     Alert.add(_lang.string("error_failed_to_save_results") + " (ERR: JSON_ERROR)", 360, Alert.RED);
 
@@ -421,7 +423,7 @@ package classes.score
                 {
                     Logger.error(instance, "Alt Parse Failure: " + Logger.exception_error(err));
                     Logger.error(instance, "Wrote invalid response data to log folder. [logs/a_result.txt]");
-                    AirContext.writeTextFile(AirContext.getAppFile("logs/a_result.txt"), siteDataString);
+                    AirContext.writeTextFile(AirContext.getAppFile(Constant.LOG_PATH).resolvePath("a_result.txt"), siteDataString);
                     return;
                 }
 

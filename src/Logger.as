@@ -47,7 +47,7 @@ package
             {
                 var now:Date = new Date();
                 var filename:String = AirContext.createFileName(now.toLocaleString(), " ");
-                LOG_FILE = AirContext.getAppFile("logs/" + filename + ".txt");
+                LOG_FILE = AirContext.getAppFile(Constant.LOG_PATH).resolvePath(filename + ".txt");
                 var fileStream:IDataOutput = LOG_FILE.openAppend(e_logFileFail);
                 if (fileStream != null)
                 {
