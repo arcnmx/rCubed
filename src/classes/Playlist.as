@@ -15,7 +15,7 @@ package classes
     import menu.MainMenu;
     import menu.MenuSongSelection;
 
-    public class Playlist extends EventDispatcher
+    public class Playlist extends EventDispatcher implements IPreloader
     {
         ///- Singleton Instance
         private static var _instance:Playlist = null;
@@ -59,6 +59,11 @@ package classes
             return _instance;
         }
 
+        public function loaderName():String
+        {
+            return "Playlist";
+        }
+
         public function isLoaded():Boolean
         {
             return _isLoaded && !_loadError;
@@ -67,6 +72,11 @@ package classes
         public function isError():Boolean
         {
             return _loadError;
+        }
+
+        public function loaderMarkDirty():void
+        {
+            _loadError = true;
         }
 
         ///- Playlist Loading

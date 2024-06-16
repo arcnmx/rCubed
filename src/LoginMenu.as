@@ -320,7 +320,7 @@ package
                 if (_data.result == 1 || _data.result == 2)
                     saveLoginDetails(this.rememberPassword, _data.session);
                 _gvars.userSession = _data.session;
-                _gvars.gameMain.loadComplete = false;
+                _gvars.gameMain.loaderMarkDirty();
                 Playlist.clearCanon();
                 switchTo("none");
             }

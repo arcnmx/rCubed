@@ -1191,25 +1191,23 @@ package menu
          */
         private function e_playChartPreviewContextSelect(e:ContextMenuEvent):void
         {
+            var song:SongItem = e.contextMenuOwner as SongItem;
             _gvars.options = new GameOptions();
             _gvars.options.fill();
-            _gvars.options.replay = new SongPreview(0);
+            _gvars.options.replay = new SongPreview(song.level, song.songInfo);
+            _gvars.options.replay.addEventListener(GlobalVariables.LOAD_COMPLETE, e_previewLoaded)
+            _gvars.options.replay.load();
+        }
 
-            if (!_gvars.options.replay.isLoaded)
-            {
-                (_gvars.options.replay as SongPreview).setupSongPreview((e.contextMenuOwner as SongItem).songInfo);
-            }
+        private function e_previewLoaded(e:Event):void
+        {
+            // Setup Vars
+            _gvars.songQueue = [];
+            _gvars.songQueue.push(Playlist.instance.getSongInfo(_gvars.options.replay.level));
 
-            if (_gvars.options.replay.isLoaded)
-            {
-                // Setup Vars
-                _gvars.songQueue = [];
-                _gvars.songQueue.push(Playlist.instance.getSongInfo(_gvars.options.replay.level));
-
-                // Switch to game
-                Alert.add(_lang.string("song_selection_load_play_chart_preview"));
-                switchTo(Main.GAME_PLAY_PANEL);
-            }
+            // Switch to game
+            Alert.add(_lang.string("song_selection_load_play_chart_preview"));
+            switchTo(Main.GAME_PLAY_PANEL);
         }
 
         /**

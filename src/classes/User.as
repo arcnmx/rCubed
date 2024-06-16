@@ -23,7 +23,7 @@ package classes
     import flash.ui.Keyboard;
     import game.SkillRating;
 
-    public class User extends EventDispatcher
+    public class User extends EventDispatcher implements IPreloader
     {
         //- Constants
         public static const ADMIN_ID:int = 6;
@@ -198,11 +198,13 @@ package classes
             }
         }
 
-        public function refreshUser():void
+        public static function refreshUser():void
         {
+            var _gvars:GlobalVariables = GlobalVariables.instance;
             _gvars.userSession = "0";
-            _gvars.playerUser = new User(true, true);
+            _gvars.playerUser = new User(false, true);
             _gvars.activeUser = _gvars.playerUser;
+            _gvars.gameMain.preloader.preload(_gvars.playerUser);
         }
 
         ///- Public
@@ -301,6 +303,11 @@ package classes
         }
 
         ///- Profile Loading
+        public function loaderName():String
+        {
+            return "User Data";
+        }
+
         public function isLoaded():Boolean
         {
             return _isLoaded && !_loadError;
@@ -309,6 +316,11 @@ package classes
         public function isError():Boolean
         {
             return _loadError;
+        }
+
+        public function loaderMarkDirty():void
+        {
+            _loadError = true;
         }
 
         public function load():void

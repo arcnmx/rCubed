@@ -14,7 +14,7 @@ package classes
     import flash.utils.ByteArray;
     import game.noteskins.*;
 
-    public class Noteskins extends EventDispatcher
+    public class Noteskins extends EventDispatcher implements IPreloader
     {
         private static const note_asset_names:Array = ["blue", "red", "yellow", "green", "purple", "pink", "orange", "cyan", "white"];
         private static const note_direction_names:Array = ["D", "U", "L", "R"];
@@ -59,6 +59,11 @@ package classes
             if (_instance == null)
                 _instance = new Noteskins(new SingletonEnforcer());
             return _instance;
+        }
+
+        public function loaderName():String
+        {
+            return "Noteskin Data";
         }
 
         /**

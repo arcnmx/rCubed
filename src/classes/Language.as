@@ -9,7 +9,7 @@ package classes
     import flash.net.URLLoader;
     import flash.net.URLRequest;
 
-    public class Language extends EventDispatcher
+    public class Language extends EventDispatcher implements IPreloader
     {
         ///- Singleton Instance
         private static var _instance:Language = null;
@@ -41,6 +41,11 @@ package classes
             }
 
             return _instance;
+        }
+
+        public function loaderName():String
+        {
+            return "Language Data";
         }
 
         public function isLoaded():Boolean

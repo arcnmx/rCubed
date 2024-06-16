@@ -8,7 +8,9 @@ package classes.replay
     import classes.Playlist;
     import classes.SongInfo;
     import classes.User;
+    import classes.IPreloader;
     import classes.replay.ReplayPack;
+    import flash.events.EventDispatcher;
     import flash.events.Event;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
@@ -19,7 +21,7 @@ package classes.replay
     import flash.utils.ByteArray;
     import menu.FileLoader;
 
-    public class Replay
+    public class Replay extends EventDispatcher implements IPreloader
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _loader:URLLoader;
@@ -32,7 +34,7 @@ package classes.replay
 
         public var replayBin:ByteArray;
 
-        public var isLoaded:Boolean = false;
+        public var _isLoaded:Boolean = false;
         public var isEdited:Boolean = false;
         public var isPreview:Boolean = false;
         public var isFileLoader:Boolean = false;
@@ -65,7 +67,7 @@ package classes.replay
                 load();
         }
 
-        private function load():void
+        public function load():void
         {
             _loader = new URLLoader();
             addLoaderListeners();
@@ -85,6 +87,21 @@ package classes.replay
             _loader.load(req);
         }
 
+        public function loaderName():String
+        {
+            return "Replay";
+        }
+
+        public function isLoaded():Boolean
+        {
+            return _isLoaded && (replayData != null || isPreview);
+        }
+
+        public function isError():Boolean
+        {
+            return _isLoaded && replayData == null && !isPreview;
+        }
+
         private function replayLoadComplete(e:Event):void
         {
             removeLoaderListeners();
@@ -95,13 +112,16 @@ package classes.replay
             }
             else
             {
-                isLoaded = true;
+                _isLoaded = true;
+                dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
             }
         }
 
         private function replayLoadError(e:Event):void
         {
             removeLoaderListeners();
+            _isLoaded = true;
+            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
         }
 
         public function parseReplay(data:Object, loadUser:Boolean = true):void
@@ -114,6 +134,7 @@ package classes.replay
             //- Level Details
             this.user = new User(loadUser, false, data.userid);
             this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
+            this.user.addEventListener(GlobalVariables.LOAD_ERROR, userError);
             if (!loadUser)
                 this.user.siteId = data.userid;
             this.level = data.replaylevelid;
@@ -228,6 +249,7 @@ package classes.replay
             //- Level Details
             this.user = new User(loadUser, false);
             this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
+            this.user.addEventListener(GlobalVariables.LOAD_ERROR, userError);
             this.user.siteId = data.user_id;
             this.level = data.song_id;
             this.timestamp = data.timestamp;
@@ -356,9 +378,23 @@ package classes.replay
 
         private function userLoad(e:Event):void
         {
-            this.user.removeEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
+            removeUserListeners();
             this.user.settings = this.settings;
-            isLoaded = true;
+            _isLoaded = true;
+            dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+        }
+
+        private function userError(e:Event):void
+        {
+            removeUserListeners();
+            _isLoaded = true;
+            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+        }
+
+        private function removeUserListeners():void
+        {
+            this.user.removeEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
+            this.user.removeEventListener(GlobalVariables.LOAD_ERROR, userError);
         }
 
         private function addLoaderListeners():void

@@ -3,6 +3,7 @@ package popups
     import assets.GameBackgroundColor;
     import classes.Language;
     import classes.Playlist;
+    import classes.User;
     import classes.mp.Multiplayer;
     import classes.ui.Box;
     import classes.ui.BoxButton;
@@ -94,21 +95,22 @@ package popups
             }
             else if (e.target.action == "reload_engine")
             {
-                if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.activePanel is GameMenu))
+                if (_gvars.gameMain.preloader.isLoaded() && !(_gvars.gameMain.activePanel is GameMenu))
                 {
                     Flags.VALUES = {};
                     Playlist.clearCanon();
-                    _gvars.gameMain.loadComplete = false;
+                    _gvars.gameMain.loaderMarkDirty();
+                    _gvars.gameMain.preloader.reload();
                     _gvars.gameMain.switchTo("none");
                 }
             }
             else if (e.target.action == "switch_profile")
             {
-                if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.activePanel is GameMenu))
+                if (_gvars.gameMain.preloader.isLoaded() && !(_gvars.gameMain.activePanel is GameMenu))
                 {
                     Flags.VALUES = {};
                     Multiplayer.instance.disconnect();
-                    _gvars.playerUser.refreshUser();
+                    User.refreshUser();
                     _gvars.gameMain.switchTo(Main.GAME_LOGIN_PANEL);
                 }
             }

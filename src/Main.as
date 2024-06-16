@@ -12,6 +12,8 @@ package
     import classes.Playlist;
     import classes.Site;
     import classes.User;
+    import classes.IPreloader;
+    import classes.replay.Replay;
     import classes.ui.BoxButton;
     import classes.ui.ProgressBar;
     import classes.ui.Text;
@@ -41,6 +43,7 @@ package
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
     import game.GameMenu;
+    import game.GameOptions;
     import menu.MainMenu;
     import menu.MenuPanel;
     import popups.PopupContextMenu;
@@ -72,12 +75,9 @@ package
         public var _playlist:Playlist = Playlist.instance;
         public var _noteskins:Noteskins = Noteskins.instance;
 
+        public var preloader:Preloader;
         public var loadTimer:int = 0;
-        public var preloader:ProgressBar;
-        public var loadScripts:uint = 0;
-        public var loadTotal:uint;
-        public var isLoginLoad:Boolean = false;
-        public var loadComplete:Boolean = false;
+        public var loadProgress:ProgressBar;
         public var retryLoadButton:BoxButton;
         public var disablePopups:Boolean = false;
         public var ignoreWindowChanges:Boolean = false;
@@ -225,6 +225,16 @@ package
             //- Build Preloader
             buildPreloader();
 
+            if (_gvars.flashvars["replay"])
+            {
+                _gvars.options = new GameOptions();
+                _gvars.options.fill();
+
+                var replayId:Number = Number(_gvars.flashvars["replay"]);
+                _gvars.options.replay = new Replay(isNaN(replayId) ? 0 : replayId);
+                preloader.preload(_gvars.options.replay);
+            }
+
             //- Load Game Data
             loadSiteData();
 
@@ -292,8 +302,8 @@ package
         private function e_uncaughtErrorHandler(e:UncaughtErrorEvent):void
         {
             Logger.enableLogger();
-            Logger.error("UNCAUGHT_ERROR", e.error);
-            Logger.info("INFO", "If possible, please submit this crash to the developers.");
+            Logger.error(e, "UNCAUGHT_ERROR: " + e.error);
+            Logger.info(this, "If possible, please submit this crash to the developers.");
             Alert.add("A fatal error has occured. You should restart the game.", 7200, Alert.RED);
         }
 
@@ -320,24 +330,54 @@ package
         ///- Preloader
         public function buildPreloader():void
         {
+            LOAD_ATTEMPTS = 0;
+
+            if (preloader == null)
+            {
+                preloader = new Preloader();
+                preloader.addEventListener(Event.COMPLETE, e_preloaderComplete);
+
+                preloader.preload(_playlist);
+                preloader.preload(_site);
+                preloader.preload(_noteskins);
+                preloader.preload(_lang);
+            }
+            if (_gvars.playerUser == null)
+                loadUserData();
+            else
+                preloader.preload(_gvars.playerUser);
+
             //- Status Display
             loadStatus = new TextField();
             loadStatus.x = 8;
-            loadStatus.y = GAME_HEIGHT - ((isLoginLoad) ? 118 : 155);
+            loadStatus.y = GAME_HEIGHT - 54;
             loadStatus.width = GAME_WIDTH - 20;
             loadStatus.selectable = false;
             loadStatus.embedFonts = true;
             loadStatus.antiAliasType = AntiAliasType.ADVANCED;
             loadStatus.autoSize = "left";
             loadStatus.defaultTextFormat = Constant.TEXT_FORMAT;
-            loadStatus.text = "\n\n\n\n\nConnecting...";
+            loadStatus.text = "Connecting...";
             this.addChild(loadStatus);
 
             //- Preloader Display
-            preloader = new ProgressBar(this, 10, GAME_HEIGHT - 30, GAME_WIDTH - 20, 20);
+            if (loadProgress != null)
+                loadProgress.remove();
+            loadProgress = new ProgressBar(this, 10, GAME_HEIGHT - 30, GAME_WIDTH - 20, 20);
 
             //- Frame Listener
             this.addEventListener(Event.ENTER_FRAME, updatePreloader);
+
+            preloader.addEventListener(Preloader.EVENT_DATA_LOADED, updatePreloader);
+            preloader.addEventListener(Preloader.EVENT_DATA_ERROR, updatePreloader);
+        }
+
+        // Reload data that depends on the global session token after logging in
+        public function loaderMarkDirty():void
+        {
+            _gvars.playerUser.loaderMarkDirty();
+            _site.loaderMarkDirty();
+            _playlist.loaderMarkDirty();
         }
 
         ///- Game Data
@@ -345,12 +385,6 @@ package
 
         public function loadSiteData():void
         {
-            if (isLoginLoad)
-            {
-                loadGameData(false);
-                return;
-            }
-
             if (LOAD_ATTEMPTS < 2)
             {
                 _site.addEventListener(GlobalVariables.LOAD_COMPLETE, gameDataScriptLoad);
@@ -358,9 +392,10 @@ package
                 _site.load();
                 LOAD_ATTEMPTS++;
             }
-            else
+            else if (loadStatus != null)
             {
-                loadStatus.text = "\n\n\n\n\nUnable to connect to the server, please check your internet connection.";
+                loadStatus.text = "Unable to connect to the server, please check your internet connection.";
+                loadStatus.y = GAME_HEIGHT - 54;
             }
         }
 
@@ -368,7 +403,6 @@ package
         {
             e.target.removeEventListener(GlobalVariables.LOAD_COMPLETE, gameDataScriptLoad);
             e.target.removeEventListener(GlobalVariables.LOAD_ERROR, gameDataScriptLoadError);
-            loadScripts++;
 
             loadGameData();
         }
@@ -385,55 +419,33 @@ package
             loadSiteData();
         }
 
-        public function loadGameData(skipSite:Boolean = true):void
+        public function loadUserData():void
         {
-            loadTotal = (!isLoginLoad) ? 5 : 3;
-
-            _gvars.playerUser = new User(true, true);
-            _gvars.playerUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            _gvars.playerUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+            _gvars.playerUser = new User(false, true);
             _gvars.activeUser = _gvars.playerUser;
-
-            _playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            _playlist.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-            _playlist.load();
-
-            if (!skipSite)
-            {
-                _site.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _site.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _site.load();
-            }
-
-            if (!isLoginLoad)
-            {
-                _lang.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _lang.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _noteskins.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _noteskins.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _lang.load();
-                _noteskins.load();
-            }
+            preloader.preload(_gvars.playerUser);
         }
 
-        private function gameScriptLoad(e:Event = null):void
+        public function loadGameData():void
         {
-            e.target.removeEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            e.target.removeEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-            loadScripts++;
-        }
+            if (_gvars.playerUser != null)
+                loadUserData();
 
-        private function gameScriptLoadError(e:Event = null):void
-        {
-            e.target.removeEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            e.target.removeEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+            preloader.load();
         }
 
         private function updateLoaderText():void
         {
-            if (loadStatus != null && _gvars.playerUser != null)
+            if (loadStatus != null)
             {
-                loadStatus.htmlText = "Total: " + loadScripts + " / " + loadTotal + "\n" + "Playlist: " + getLoadText(_playlist.isLoaded(), _playlist.isError()) + "\n" + "User Data: " + getLoadText(_gvars.playerUser.isLoaded(), _gvars.playerUser.isError()) + "\n" + "Site Data: " + getLoadText(_site.isLoaded(), _site.isError()) + ((!isLoginLoad) ? ("\n" + "Noteskin Data: " + getLoadText(_noteskins.isLoaded(), _noteskins.isError()) + "\n" + "Language Data: " + getLoadText(_lang.isLoaded(), _lang.isError())) : "");
+                var loadTotal:uint = preloader.amtTotal;
+                var loadText:String = "Total: " + preloader.amtLoaded + " / " + loadTotal + "\n";
+                for each (var loader:IPreloader in preloader.loaders)
+                {
+                    loadText += "\n" + loader.loaderName() + ": " + getLoadText(loader.isLoaded(), loader.isError());
+                }
+                loadStatus.htmlText = loadText;
+                loadStatus.y = GAME_HEIGHT - 54 - (loadTotal + 2) * 16;
             }
         }
 
@@ -455,75 +467,58 @@ package
             updateLoaderText();
 
             loadTimer++;
-            preloader.update(loadScripts / loadTotal);
+            loadProgress.update(preloader.amtLoaded / preloader.amtTotal);
             if (loadTimer >= 300 && !retryLoadButton)
             {
-                retryLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, preloader.y - 35, 75, 25, "RELOAD", 12, e_retryClick);
+                retryLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, loadProgress.y - 35, 75, 25, "RELOAD", 12, e_retryClick);
             }
+        }
 
-            if (preloader.isComplete)
+        private function e_preloaderComplete(e:Event):void
+        {
+            if (retryLoadButton && this.contains(retryLoadButton))
             {
-                loadComplete = true;
-                if (retryLoadButton && this.contains(retryLoadButton))
-                {
-                    removeChild(retryLoadButton);
-                    retryLoadButton.dispose();
-                }
-
-                buildContextMenu();
-                loadScripts = 0;
-                preloader.remove();
-                removeChild(loadStatus);
-                this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
-                _playlist.updateSongAccess();
-                _playlist.updatePublicSongsCount();
-                _gvars.loadUserSongData();
-                _gvars.playerUser.getUserSkillRatingData();
-                Updater.handle(_site.data['update_version'], _site.data['update_url']);
-                switchTo(_gvars.playerUser.isGuest ? GAME_LOGIN_PANEL : GAME_MENU_PANEL);
+                removeChild(retryLoadButton);
+                retryLoadButton.dispose();
             }
+
+            buildContextMenu();
+            if (loadProgress != null)
+            {
+                loadProgress.remove();
+                loadProgress = null;
+            }
+            if (loadStatus != null && this.contains(loadStatus))
+            {
+                removeChild(loadStatus);
+                loadStatus = null;
+            }
+            this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
+            preloader.removeEventListener(Preloader.EVENT_DATA_LOADED, updatePreloader);
+            preloader.removeEventListener(Preloader.EVENT_DATA_ERROR, updatePreloader);
+            _playlist.updateSongAccess();
+            _playlist.updatePublicSongsCount();
+            _gvars.loadUserSongData();
+            _gvars.playerUser.getUserSkillRatingData();
+            Updater.handle(_site.data['update_version'], _site.data['update_url']);
+            var nextPanel:String = _gvars.playerUser.isGuest ? GAME_LOGIN_PANEL : GAME_MENU_PANEL;
+            if (_gvars.options != null && _gvars.options.replay != null && _gvars.options.replay.isLoaded())
+            {
+                _gvars.options.fillFromReplay();
+                _gvars.songQueue.push(Playlist.instance.getSongInfo(_gvars.options.replay.level));
+                nextPanel = GAME_PLAY_PANEL;
+            }
+            switchTo(nextPanel);
         }
 
         private function e_retryClick(e:Event):void
         {
             Alert.add(_lang.string("reload_scripts"));
 
-            if (!_playlist.isLoaded())
-            {
-                _playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _playlist.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _playlist.load();
-            }
-            if (!_site.isLoaded())
-            {
-                _site.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _site.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _site.load();
-            }
             if (!_gvars.playerUser || !_gvars.playerUser.isLoaded())
-            {
-                _gvars.playerUser = new User(true, true);
-                _gvars.playerUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _gvars.playerUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _gvars.playerUser.load();
-                _gvars.activeUser = _gvars.playerUser;
-            }
+                loadUserData();
 
-            if (!isLoginLoad)
-            {
-                if (!_noteskins.isLoaded())
-                {
-                    _noteskins.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                    _noteskins.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                    _noteskins.load();
-                }
-                if (!_lang.isLoaded())
-                {
-                    _lang.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                    _lang.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                    _lang.load();
-                }
-            }
+            preloader.load();
 
             // Update Text
             updateLoaderText();
@@ -548,14 +543,11 @@ package
                     TweenLite.to(activePanel, 0.5, {alpha: 0, onComplete: removeLastPanel, onCompleteParams: [activePanel]});
                 }
 
-                // Only load data that depend on the global session token after logging in
-                this.isLoginLoad = true;
-
                 //- Build Preloader
                 buildPreloader();
 
                 //- Load Game Data
-                loadGameData(false);
+                loadGameData();
 
                 return true;
             }

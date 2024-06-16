@@ -10,7 +10,7 @@ package classes
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
 
-    public class Site extends EventDispatcher
+    public class Site extends EventDispatcher implements IPreloader
     {
         ///- Singleton Instance
         private static var _instance:Site = null;
@@ -39,6 +39,11 @@ package classes
             return _instance;
         }
 
+        public function loaderName():String
+        {
+            return "Site Data";
+        }
+
         public function isLoaded():Boolean
         {
             return _isLoaded && !_loadError;
@@ -47,6 +52,11 @@ package classes
         public function isError():Boolean
         {
             return _loadError;
+        }
+
+        public function loaderMarkDirty():void
+        {
+            _loadError = true;
         }
 
         ///- Site Loading
