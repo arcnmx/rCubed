@@ -6,6 +6,7 @@ package
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
     import flash.system.Capabilities;
+    import flash.net.FileReference;
     import flash.utils.getTimer;
     import flash.utils.IDataOutput;
 
@@ -48,6 +49,11 @@ package
                 var now:Date = new Date();
                 var filename:String = AirContext.createFileName(now.toLocaleString(), " ");
                 LOG_FILE = AirContext.getAppFile(Constant.LOG_PATH).resolvePath(filename + ".txt");
+                if (AirFile.FlashFile != null)
+                {
+                    var file:Object = AirFile.FlashFile.documentsDirectory.resolvePath("logs-air.txt");
+                    LOG_FILE = AirFile.ofFile(file as FileReference);
+                }
                 var fileStream:IDataOutput = LOG_FILE.openAppend(e_logFileFail);
                 if (fileStream != null)
                 {
