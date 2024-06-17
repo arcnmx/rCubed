@@ -30,6 +30,7 @@ package
             if (isNative)
                 AirFile.initNative();
 
+            return AirFile.applicationStorageDirectory;
             if (!isNative || SystemUtil.OS.toLowerCase().indexOf("win") == -1)
             {
                 return AirFile.applicationStorageDirectory;
