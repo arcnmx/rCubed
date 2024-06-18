@@ -261,6 +261,7 @@ package popups.replays
                         }
                     }
 
+                    // TODO: all this logic is needed for flashvars replays to work
                     if (!replay.user.isLoaded())
                         replay.user.loadUser(replay.user.siteId);
 

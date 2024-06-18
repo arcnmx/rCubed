@@ -114,6 +114,9 @@ package
                 this.addEventListener(Event.ADDED_TO_STAGE, gameInit);
         }
 
+        // TODO: there should be a url handler so you can instruct the game both at launch (via flashvars/whatever) *and* when it's already running.
+        // TODO: but maybe queue switches until it would normally switch to menu?
+
         private function gameInit(e:Event = null):void
         {
             //- Remove Stage Listener
@@ -232,6 +235,12 @@ package
 
                 var replayId:Number = Number(_gvars.flashvars["replay"]);
                 _gvars.options.replay = new Replay(isNaN(replayId) ? 0 : replayId);
+                if (isNaN(replayId))
+                {
+                    Logger.warning(this, "flashvars.replay not a numeric ID");
+                    // TODO: parse replay string?
+                }
+                Logger.info(this, "preloading replay...");
                 preloader.preload(_gvars.options.replay);
             }
 
@@ -330,10 +339,13 @@ package
         ///- Preloader
         public function buildPreloader():void
         {
+            Logger.info(this, "buildPreloader()");
             LOAD_ATTEMPTS = 0;
 
+// TODO: maybe just preloader.clear?
             if (preloader == null)
             {
+            Logger.info(this, "new Preloader()");
                 preloader = new Preloader();
                 preloader.addEventListener(Event.COMPLETE, e_preloaderComplete);
 
@@ -375,6 +387,7 @@ package
         // Reload data that depends on the global session token after logging in
         public function loaderMarkDirty():void
         {
+// TODO: btw on 2nd load (after login) only 3 things need to be reloaded: Site Data, User Data, Playlist
             _gvars.playerUser.loaderMarkDirty();
             _site.loaderMarkDirty();
             _playlist.loaderMarkDirty();
@@ -463,6 +476,8 @@ package
         ///- PreloaderHandlers
         private function updatePreloader(e:Event):void
         {
+if (e.type != Event.ENTER_FRAME)
+Logger.info(e, "updatePreloader: " + e.type);
             // Update Text
             updateLoaderText();
 
@@ -476,6 +491,7 @@ package
 
         private function e_preloaderComplete(e:Event):void
         {
+Logger.info(e, "e_preloaderComplete: " + e.type);
             if (retryLoadButton && this.contains(retryLoadButton))
             {
                 removeChild(retryLoadButton);
@@ -500,7 +516,10 @@ package
             _playlist.updatePublicSongsCount();
             _gvars.loadUserSongData();
             _gvars.playerUser.getUserSkillRatingData();
+            // TODO: ignore Updater for non-native?
             Updater.handle(_site.data['update_version'], _site.data['update_url']);
+            // TODO: mp join support switch to *after* login
+
             var nextPanel:String = _gvars.playerUser.isGuest ? GAME_LOGIN_PANEL : GAME_MENU_PANEL;
             if (_gvars.options != null && _gvars.options.replay != null && _gvars.options.replay.isLoaded())
             {

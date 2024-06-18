@@ -14,6 +14,7 @@ package
 
         public function preload(loader:IPreloader):void
         {
+            Logger.info(this, "preload(" + loader.loaderName() + ")");
             var prev:Object = loaders[loader.loaderName()];
             if (prev != null)
             {
@@ -84,7 +85,15 @@ package
             if (isLoaded())
                 dispatchEvent(new Event(Event.COMPLETE));
             else
+{
+                    Logger.info(this, amtLoaded.toString() + " / " + amtTotal.toString());
+            for each (var loader:IPreloader in loaders)
+            {
+                if (!loader.isLoaded())
+                    Logger.info(this, "still not loaded: " + loader.loaderName());
+            }
                 dispatchEvent(e);
+}
         }
 
         private function e_loaderError(e:Event):void
