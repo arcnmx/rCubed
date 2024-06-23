@@ -1,49 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <flex-config>
 	<compiler>
-		<define>
+		<define append="true">
 			<name>CONFIG::updater</name>
 			<value>false</value>
 		</define>
-		<define>
+		<define append="true">
 			<name>R3::VERSION_PREFIX</name>
 			<value>"MAIN_LIB"</value>
-		</define>
-		<!-- common settings -->
-		<define>
-			<name>CONFIG::debug</name>
-			<value>false</value>
-		</define>
-		<define>
-			<name>CONFIG::release</name>
-			<value>false</value>
-		</define>
-		<define>
-			<name>CONFIG::timeStamp</name>
-			<value>"#{TIMESTAMP}#"</value>
-		</define>
-		<define>
-			<name>R3::HASH_STRING</name>
-			<value>"hash:#{SCORE_SAVE_SALT}#"</value>
-		</define>
-		<define>
-			<name>R3::BRAND_NAME_LONG</name>
-			<value>"FlashFlashRevolution"</value>
-		</define>
-		<define>
-			<name>R3::BRAND_NAME_SHORT</name>
-			<value>"FFR"</value>
-		</define>
-		<define>
-			<name>R3::ROOT_URL</name>
-			<value>"www.flashflashrevolution.com"</value>
-		</define>
-		<define>
-			<name>R3::VERSION</name>
-			<value>"#{VERSION}#"</value>
-		</define>
-		<define>
-			<name>R3::VERSION_SUFFIX</name>
-			<value>""</value>
 		</define>
 	</compiler>
 	<include-sources>

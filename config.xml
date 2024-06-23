@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <flex-config>
 	<compiler>
 		<source-path>
@@ -14,6 +15,46 @@
 		<!--<locale>
 			<locale-element>en_US</locale-element>
 		</locale>-->
+		<define>
+			<name>CONFIG::debug</name>
+			<value>false</value>
+		</define>
+		<define>
+			<name>CONFIG::release</name>
+			<value>false</value>
+		</define>
+		<define>
+			<name>CONFIG::timeStamp</name>
+			<value>"9999-12-31"</value>
+		</define>
+		<define>
+			<name>R3::BRAND_NAME_LONG</name>
+			<value>"FlashFlashRevolution"</value>
+		</define>
+		<define>
+			<name>R3::BRAND_NAME_SHORT</name>
+			<value>"FFR"</value>
+		</define>
+		<define>
+			<name>R3::ROOT_URL</name>
+			<value>"www.flashflashrevolution.com"</value>
+		</define>
+		<define>
+			<name>R3::HASH_STRING</name>
+			<value>"hashstring"</value>
+		</define>
+		<define>
+			<name>R3::VERSION</name>
+			<value>"2.0"</value>
+		</define>
+		<define>
+			<name>R3::VERSION_PREFIX</name>
+			<value>""</value>
+		</define>
+		<define>
+			<name>R3::VERSION_SUFFIX</name>
+			<value>""</value>
+		</define>
 	</compiler>
 	<swf-version>26</swf-version>
 	<target-player>26.0</target-player>
