@@ -26,6 +26,10 @@
 				"value": true
 			},
 			{
+				"name": "CONFIG::embedNoteskins",
+				"value": true
+			},
+			{
 				"name": "CONFIG::updater",
 				"value": false
 			},

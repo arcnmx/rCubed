@@ -25,6 +25,10 @@
 			<value>true</value>
 		</define>
 		<define>
+			<name>CONFIG::embedNoteskins</name>
+			<value>true</value>
+		</define>
+		<define>
 			<name>CONFIG::timeStamp</name>
 			<value>"9999-12-31"</value>
 		</define>
