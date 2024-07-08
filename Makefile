@@ -30,8 +30,7 @@ SRCS_FONTS := $(shell find $(DIR_FONTS) -type f -name "*.as") \
 	$(shell find $(DIR_FONTS) -type f -name "*.ttc")
 SRCS_ASSETS := \
 	$(wildcard $(DIR_SRC)/game/noteskins/*.swf) \
-	$(shell find $(DIR_LIBS) -type f -name "*.swc") \
-	$(BIN_FONTS)
+	$(shell find $(DIR_LIBS) -type f -name "*.swc")
 SRCS_DATA := $(wildcard $(DIR_ROOT)/data/icons/*.png) \
 	$(DIR_ROOT)/changelog.txt
 SRC_CERT := certs/air-make.p12
@@ -50,6 +49,7 @@ VERSION := 2.0
 CERT_PASSWORD ?= ffr
 # when building offline `make package TSA=none`
 TSA ?= http://timestamp.digicert.com
+EMBED_FONTS ?= 1
 
 FLAGS_COMMON := \
 	-define+='CONFIG::timeStamp','"$(TIMESTAMP)"'
@@ -74,6 +74,16 @@ ifneq ($(BRAND_NAME_SHORT),)
 	FLAGS_COMMON := $(FLAGS_COMMON) \
 		-define+='R3::BRAND_NAME_SHORT','"$(BRAND_NAME_SHORT)"' \
 		-define+='R3::BRAND_NAME_LONG','"$(BRAND_NAME_LONG)"'
+endif
+
+ifeq ($(EMBED_FONTS),1)
+	SRCS_ASSETS := $(SRCS_ASSETS) \
+		$(BIN_FONTS)
+	FLAGS_COMMON := $(FLAGS_COMMON) \
+		-compiler.include-libraries+='$(dir $(BIN_FONTS))'
+else
+	FLAGS_COMMON := $(FLAGS_COMMON) \
+		-define+='CONFIG::embedFonts','false'
 endif
 
 all: debug release lib

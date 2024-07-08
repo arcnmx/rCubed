@@ -22,6 +22,10 @@
 				"value": false
 			},
 			{
+				"name": "CONFIG::embedFonts",
+				"value": true
+			},
+			{
 				"name": "CONFIG::updater",
 				"value": false
 			},

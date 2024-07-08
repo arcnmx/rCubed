@@ -4,9 +4,6 @@
 		<source-path>
 			<path-element>./src</path-element>
 		</source-path>
-		<include-libraries>
-			<library>./bin/fonts/</library>
-		</include-libraries>
 		<library-path append="true">
 			<path-element>./libs/</path-element>
 			<path-element>./libs/assets/</path-element>
@@ -22,6 +19,10 @@
 		<define>
 			<name>CONFIG::release</name>
 			<value>false</value>
+		</define>
+		<define>
+			<name>CONFIG::embedFonts</name>
+			<value>true</value>
 		</define>
 		<define>
 			<name>CONFIG::timeStamp</name>

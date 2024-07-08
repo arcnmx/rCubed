@@ -25,6 +25,10 @@
 				"value": false
 			},
 			{
+				"name": "CONFIG::embedFonts",
+				"value": true
+			},
+			{
 				"name": "CONFIG::timeStamp",
 				"value": "\"9999-12-31\""
 			},
