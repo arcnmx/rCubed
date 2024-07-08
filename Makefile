@@ -29,7 +29,6 @@ SRCS_FONTS := $(shell find $(DIR_FONTS) -type f -name "*.as") \
 	$(shell find $(DIR_FONTS) -type f -name "*.ttf") \
 	$(shell find $(DIR_FONTS) -type f -name "*.ttc")
 SRCS_ASSETS := \
-	$(wildcard $(DIR_SRC)/game/noteskins/*.swf) \
 	$(shell find $(DIR_LIBS) -type f -name "*.swc")
 SRCS_DATA := $(wildcard $(DIR_ROOT)/data/icons/*.png) \
 	$(DIR_ROOT)/changelog.txt
@@ -50,6 +49,7 @@ CERT_PASSWORD ?= ffr
 # when building offline `make package TSA=none`
 TSA ?= http://timestamp.digicert.com
 EMBED_FONTS ?= 1
+EMBED_NOTESKINS ?= 1
 
 FLAGS_COMMON := \
 	-define+='CONFIG::timeStamp','"$(TIMESTAMP)"'
@@ -84,6 +84,14 @@ ifeq ($(EMBED_FONTS),1)
 else
 	FLAGS_COMMON := $(FLAGS_COMMON) \
 		-define+='CONFIG::embedFonts','false'
+endif
+
+ifeq ($(EMBED_NOTESKINS),1)
+	SRCS_ASSETS := $(SRCS_ASSETS) \
+		$(wildcard $(DIR_SRC)/game/noteskins/*.swf)
+else
+	FLAGS_COMMON := $(FLAGS_COMMON) \
+		-define+='CONFIG::embedNoteskins','false'
 endif
 
 all: debug release lib

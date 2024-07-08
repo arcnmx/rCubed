@@ -111,6 +111,10 @@ package classes
             _loadError = false;
             _data = {};
 
+            // TODO: revert dc139f2e6500f5f2a963a2262e2f242f9737451a and use noteskin xml again
+
+            CONFIG::embedNoteskins {
+
             var embeddedNoteskins:Vector.<EmbedNoteskinBase> = new <EmbedNoteskinBase>[new EmbedNoteskin1(),
                 new EmbedNoteskin2(),
                 new EmbedNoteskin3(),
@@ -127,6 +131,23 @@ package classes
                 _data[embedNoteskin.getID()] = embedNoteskin.getData();
                 _data[embedNoteskin.getID()]["notes"] = {};
                 loadNoteskinSWF(embedNoteskin.getID(), embedNoteskin.getBytes());
+            }
+
+            }
+
+            if (!CONFIG::embedNoteskins)
+            {
+                // TODO: request URLs.NOTESKIN_URL instead and dynamically parse it!
+                for (var noteID:int = 1;  noteID <= 10; noteID++)
+                {
+                    var name:String = "NoteSkin" + noteID;
+                    // TODO: add ?d=datetime and possibly other request stuff?
+                    var url:String = URLs.resolve(URLs.NOTESKIN_SWF_URL + name + ".swf");
+                    var _swfloader:DynamicLoader = AirContext.loadFile(AirFile.ofUrl(url), noteskinSWFLoadComplete, noteskinSWFLoadError);
+                    _swfloader.ID = noteID;
+                    _data[noteID]["type"] = TYPE_SWF;
+                    totalNoteskins++;
+                }
             }
 
             loadCustomNoteskin();

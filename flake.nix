@@ -198,6 +198,7 @@
       flash = { mkShell, gnumake, apache-flash-player-sdk, adobe-flex-playerglobal }: mkShell {
         AIR = "0";
         TARGET_PLAYER = adobe-flex-playerglobal.version;
+        #EMBED_NOTESKINS = "0";
         EMBED_FONTS = "0";
         nativeBuildInputs = [
           gnumake
